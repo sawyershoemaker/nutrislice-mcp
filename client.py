@@ -51,6 +51,16 @@ def _build_url(district: str, school: str, menu_type: str, d: _Date) -> str:
 
 def _slim_food(food: dict[str, Any]) -> dict[str, Any]:
     slim = {k: v for k in _FOOD_FIELDS if (v := food.get(k)) not in (None, "")}
+    if not slim.get("nutrition_info"):
+        rounded = food.get("rounded_nutrition_info")
+        if isinstance(rounded, dict) and rounded:
+            slim["nutrition_info"] = rounded
+    serving = food.get("serving_size_info")
+    if isinstance(serving, dict):
+        if slim.get("serving_size_amount") in (None, "") and serving.get("serving_size_amount") not in (None, ""):
+            slim["serving_size_amount"] = serving["serving_size_amount"]
+        if slim.get("serving_size_unit") in (None, "") and serving.get("serving_size_unit") not in (None, ""):
+            slim["serving_size_unit"] = serving["serving_size_unit"]
     raw_icons = food.get("icons")
     if isinstance(raw_icons, list):
         slim["icons"] = [ic["name"] for ic in raw_icons if ic.get("name")]
